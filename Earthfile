@@ -66,26 +66,35 @@ build:
     ENV CPPFLAGS="-I/opt/curl-static/include"
     ENV LDFLAGS="-L/opt/curl-static/lib -static"
 
-    # Download and unpack Git.
     WORKDIR /tmp
 
     RUN curl -fsSL \
           "https://github.com/git/git/archive/refs/tags/v${GIT_VERSION}.tar.gz" \
           -o git.tar.gz \
-        && tar -xzf git.tar.gz
+        && tar -xzf git.tar.gz \
+        && cd "git-${GIT_VERSION}" \
+        && make configure
 
     WORKDIR /tmp/git-${GIT_VERSION}
 
-    # Generate Git's configure script and configure for a static executable.
-    RUN make configure \
-        && ./configure \
+    RUN ./configure \
           --prefix="/dist/git-${GIT_VERSION}" \
           CFLAGS="-O2 -static" \
           LDFLAGS="-static -L/opt/curl-static/lib"
 
-    # Build and install Git with static libcurl.
-    RUN make -j2 CURL_CONFIG=/opt/curl-static/bin/curl-config CURL_STATIC=YesPlease \
-        && make CURL_CONFIG=/opt/curl-static/bin/curl-config CURL_STATIC=YesPlease install
+    RUN make -j2 \
+          CURL_CONFIG=/opt/curl-static/bin/curl-config \
+          CURL_STATIC=YesPlease \
+          NO_GETTEXT=YesPlease \
+          NO_TCLTK=YesPlease \
+          NO_PERL=YesPlease \
+        && make \
+          CURL_CONFIG=/opt/curl-static/bin/curl-config \
+          CURL_STATIC=YesPlease \
+          NO_GETTEXT=YesPlease \
+          NO_TCLTK=YesPlease \
+          NO_PERL=YesPlease \
+          install
 
     # Export the installed Git executables.
     SAVE ARTIFACT /dist/git-${GIT_VERSION}/bin/git AS LOCAL ./dist/git
