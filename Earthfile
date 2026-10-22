@@ -4,8 +4,13 @@ FROM alpine
 
 RUN apk add --no-cache \
     curl curl-dev curl-static \
-    openssl-dev ca-certificates \
-    pkgconf \
+    openssl-dev openssl-libs-static \
+    nghttp2-dev nghttp2-static \
+    libidn2-dev libidn2-static \
+    libpsl-dev libpsl-static \
+    zstd-dev zstd-static \
+    brotli-dev brotli-static \
+    ca-certificates pkgconf \
     autoconf gcc flex bison make bash cmake libtool musl-dev g++ \
     linux-headers \
     zlib-dev zlib-static \
