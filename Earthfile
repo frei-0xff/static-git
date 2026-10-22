@@ -2,18 +2,7 @@ VERSION 0.6
 
 FROM alpine
 
-RUN apk add --no-cache 
-    curl 
-    curl-dev 
-    openssl-dev 
-    ca-certificates 
-    pkgconf 
-    autoconf gcc flex bison make bash cmake libtool musl-dev g++ 
-    linux-headers 
-    zlib-dev zlib-static 
-    tcl tk 
-    tcl-dev gettext 
-    cargo rust
+RUN apk add --no-cache curl curl-dev openssl-dev ca-certificates pkgconf autoconf gcc flex bison make bash cmake libtool musl-dev g++ linux-headers zlib-dev zlib-static tcl tk tcl-dev gettext cargo rust
 
 ARG GIT_VERSION
 
@@ -23,14 +12,9 @@ build:
     WORKDIR /git-${GIT_VERSION}
 
     RUN make configure && sed -i 's/qversion/-version/g' configure
-
-    # Detect libcurl and TLS support.
     RUN pkg-config --modversion libcurl
     RUN pkg-config --libs libcurl
-    RUN ./configure prefix=/dist/git-${GIT_VERSION} LDFLAGS="--static" CFLAGS="${CFLAGS} -static"
-
-    # Fail if Git was configured without curl support.
-    RUN grep -E 'CURL_LDFLAGS|CURL_LIBCURL|NO_CURL' config.mak.autogen config.mak 2>/dev/null || true
+    RUN ./configure prefix=/dist/git-${GIT_VERSION}
     RUN make
     RUN make install
 
