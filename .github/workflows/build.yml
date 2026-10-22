@@ -1,38 +1,57 @@
-
-name: Compile Git Release
+name: Compile Git
 
 on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      git_version:
+        description: "Upstream Git version to compile (e.g. 2.51.0)"
+        required: true
+        type: string
+        default: "2.51.0"
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+
     env:
       FORCE_COLOR: 1
       EARTHLY_DISABLE_ANALYTICS: 1
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Download earthly
-      run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.8.16/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
-    - name: Compile upstream git release
-      run: earthly --use-inline-cache --save-inline-cache --strict +build --GIT_VERSION=${{github.ref_name}}
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: git
-        path: ./dist/*
-        if-no-files-found: error
-    - name: Compress the binaries
-      run: cd dist && tar -czvf ../git-binaries.linux-64bit.tar.gz *
-    - name: Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "git-binaries.linux-64bit.tar.gz"
-        allowUpdates: true
-        removeArtifacts: true
-        artifactErrorsFailBuild: true
-        body: statically compiled git v${{github.ref_name}} from https://github.com/git/git/releases/tag/v${{github.ref_name}}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download earthly
+        run: |
+          sudo wget \
+            https://github.com/earthly/earthly/releases/download/v0.8.16/earthly-linux-amd64 \
+            -O /usr/local/bin/earthly
+          sudo chmod +x /usr/local/bin/earthly
+
+      - name: Compile upstream Git release
+        run: |
+          earthly --use-inline-cache --save-inline-cache --strict \
+            +build --GIT_VERSION="${{ inputs.git_version }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: git-${{ inputs.git_version }}-linux-amd64
+          path: ./dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compress the binaries
+        run: |
+          tar -czf git-binaries.linux-amd64.tar.gz -C dist .
+
+      - name: Upload compressed archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: git-${{ inputs.git_version }}-linux-amd64-archive
+          path: git-binaries.linux-amd64.tar.gz
+          if-no-files-found: error
+          retention-days: 14
