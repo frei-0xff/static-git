@@ -2,14 +2,14 @@ VERSION 0.6
 
 FROM alpine
 
-RUN apk add --no-cache 
-    curl curl-dev curl-static 
-    openssl-dev ca-certificates 
-    pkgconf 
-    autoconf gcc flex bison make bash cmake libtool musl-dev g++ 
-    linux-headers 
-    zlib-dev zlib-static 
-    tcl tk tcl-dev gettext 
+RUN apk add --no-cache \
+    curl curl-dev curl-static \
+    openssl-dev ca-certificates \
+    pkgconf \
+    autoconf gcc flex bison make bash cmake libtool musl-dev g++ \
+    linux-headers \
+    zlib-dev zlib-static \
+    tcl tk tcl-dev gettext \
     cargo rust
 
 ARG GIT_VERSION
