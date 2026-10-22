@@ -79,5 +79,4 @@ build:
           install
 
     # Export the installed Git executables.
-    SAVE ARTIFACT /dist/git-${GIT_VERSION}/bin/git AS LOCAL ./dist/git
-    SAVE ARTIFACT /dist/git-${GIT_VERSION}/bin/git-* AS LOCAL ./dist/
+    SAVE ARTIFACT /dist/git-${GIT_VERSION} AS LOCAL ./dist/git-${GIT_VERSION}
