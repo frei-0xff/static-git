@@ -82,13 +82,16 @@ build:
           CFLAGS="-O2 -static" \
           LDFLAGS="-static -L/opt/curl-static/lib"
 
-    RUN make -j2 \
+    RUN make clean \
+        && make -j2 \
+          NO_PTHREADS=YesPlease \
           CURL_CONFIG=/opt/curl-static/bin/curl-config \
           CURL_STATIC=YesPlease \
           NO_GETTEXT=YesPlease \
           NO_TCLTK=YesPlease \
           NO_PERL=YesPlease \
         && make \
+          NO_PTHREADS=YesPlease \
           CURL_CONFIG=/opt/curl-static/bin/curl-config \
           CURL_STATIC=YesPlease \
           NO_GETTEXT=YesPlease \
