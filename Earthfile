@@ -8,33 +8,12 @@ build:
     ARG CURL_VERSION=8.12.1
 
     RUN apk add --no-cache \
-        bash \
-        ca-certificates \
-        curl \
-        autoconf \
-        automake \
-        gcc \
-        g++ \
-        make \
-        musl-dev \
-        linux-headers \
-        perl \
-        pkgconf \
-        libtool \
-        gettext \
-        gettext-dev \
-        zlib-dev \
-        zlib-static \
-        openssl-dev \
-        openssl-libs-static \
-        xz \
-        tar \
-        bison \
-        flex \
-        tcl \
-        tk \
-        tcl-dev \
-        tk-dev
+        cargo rust \
+        bash ca-certificates curl \
+        autoconf automake gcc g++ make musl-dev linux-headers \
+        perl pkgconf libtool gettext gettext-dev \
+        zlib-dev zlib-static openssl-dev openssl-libs-static \
+        xz tar bison flex tcl tk tcl-dev tk-dev
 
     WORKDIR /tmp
 
