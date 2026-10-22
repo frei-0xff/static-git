@@ -2,7 +2,15 @@ VERSION 0.6
 
 FROM alpine
 
-RUN apk add --no-cache curl curl-dev openssl-dev ca-certificates pkgconf autoconf gcc flex bison make bash cmake libtool musl-dev g++ linux-headers zlib-dev zlib-static tcl tk tcl-dev gettext cargo rust
+RUN apk add --no-cache \
+    curl curl-dev curl-static \
+    openssl-dev ca-certificates \
+    pkgconf \
+    autoconf gcc flex bison make bash cmake libtool musl-dev g++ \
+    linux-headers \
+    zlib-dev zlib-static \
+    tcl tk tcl-dev gettext \
+    cargo rust
 
 ARG GIT_VERSION
 
@@ -12,10 +20,21 @@ build:
     WORKDIR /git-${GIT_VERSION}
 
     RUN make configure && sed -i 's/qversion/-version/g' configure
+
     RUN pkg-config --modversion libcurl
-    RUN pkg-config --libs libcurl
-    RUN ./configure prefix=/dist/git-${GIT_VERSION}
-    RUN make
-    RUN make install
+    RUN curl-config --static-libs
+
+    RUN ./configure prefix=/dist/git-${GIT_VERSION} \
+        CFLAGS="-O2 -static" \
+        LDFLAGS="-static"
+
+    RUN make -j2 CURL_STATIC=YesPlease
+    RUN make CURL_STATIC=YesPlease install
+
+    # Verify that the Git executable has no dynamic ELF interpreter.
+    RUN file /dist/git-${GIT_VERSION}/bin/git
+    RUN if readelf -l /dist/git-${GIT_VERSION}/bin/git | grep -q INTERP; then \
+        echo "ERROR: Git is dynamically linked"; exit 1; \
+        fi
 
     SAVE ARTIFACT /dist/git-${GIT_VERSION}/bin/* AS LOCAL ./dist/
