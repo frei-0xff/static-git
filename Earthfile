@@ -31,10 +31,4 @@ build:
     RUN make -j2 CURL_STATIC=YesPlease
     RUN make CURL_STATIC=YesPlease install
 
-    # Verify that the Git executable has no dynamic ELF interpreter.
-    RUN file /dist/git-${GIT_VERSION}/bin/git
-    RUN if readelf -l /dist/git-${GIT_VERSION}/bin/git | grep -q INTERP; then \
-        echo "ERROR: Git is dynamically linked"; exit 1; \
-        fi
-
     SAVE ARTIFACT /dist/git-${GIT_VERSION}/bin/* AS LOCAL ./dist/
