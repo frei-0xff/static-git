@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download earthly
+      - name: Download Earthly
         run: |
           sudo wget \
             https://github.com/earthly/earthly/releases/download/v0.8.16/earthly-linux-amd64 \
@@ -35,6 +35,14 @@ jobs:
         run: |
           earthly --use-inline-cache --save-inline-cache --strict \
             +build --GIT_VERSION="${{ inputs.git_version }}"
+
+      - name: Verify HTTPS support
+        run: |
+          git_binary="./dist/git-${{ inputs.git_version }}/bin/git"
+          test -x "$git_binary"
+          "$git_binary" --version
+          "$git_binary" -c http.sslVerify=true \
+            ls-remote https://github.com/git/git.git HEAD
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
